@@ -1,44 +1,41 @@
 __author__ = 'gabriel'
-import Indexer
-import Preprocessor
-import numpy as np
+
+import ConfigReader
+import pickle
+from Indexer import TfIdf
+
 
 class Searcher:
-    def __init__(self, index = Indexer.Indexer()):
-        self.index = index
+    def __init__(self):
+        pass
 
-    def search(self, query):
-        tokens = Preprocessor.preprocessor_tokenizer(query)
-        candidate_docs = None
-        n_docs, n_terms = np.shape(self.index.document_term_matrix)
+    def do_search(self, config_file_name="busca.cfg"):
+        cfg = ConfigReader.read_cfg(config_file_name)
+        model_file_name = cfg["MODELO"][0]
+        queries_file_name = cfg["CONSULTAS"][0]
+        results_file_name = cfg["RESULTADOS"][0]
 
-        query_vector = np.zeros((1, n_terms))
-        for token in tokens:
-            if token not in self.index.term_dict:
-                continue
-            term_id = self.index.term_dict[token]
-            query_vector[0, term_id] +=  1
+        self.model = pickle.load(open(model_file_name, 'rb'))
+        with open(results_file_name, 'w') as results_file:
+            with open(queries_file_name) as queries:
+                for l in queries.readlines():
+                    temp = l.split(';')
+                    query_id = temp[0]
+                    query = temp[1]
+                    self._write(query_id, query, results_file)
 
-            # candidates = np.where(self.index.document_term_matrix[:, term_id][0])
-            # candidates = set(candidates)
-            # if candidate_docs is None:
-            #     candidate_docs = candidates
-            # else:
-            #     candidate_docs.intersection(candidates)
+    def _write(self, query_id, query, results_file):
+        similarities = self.model.retrieve(query)
+        sorted_docs = list(similarities .keys())
+        sorted_docs.sort(key=lambda doc_id: similarities[doc_id], reverse=True)
 
-        docs_sim = []
-        for doc_id in range(n_docs):
-            similarity = self.index.document_term_matrix[doc_id, :] * query_vector.T
-            docs_sim.append(similarity[0][0])
-
-        return docs_sim
+        results_file.write(query_id + "; [")
+        i = 1
+        for doc_id in sorted_docs:
+            results_file.write("(" + str(i) + ", " + str(doc_id) + ", " + str(similarities[doc_id]) + "), ")
+            i += 1
+        results_file.write("]\n")
 
 if __name__=="__main__":
-    import InvertedList
-    docs_dict = {1: "Olá, mundo imundo", 2:"olá mundo mundo"}
-    invListObj = InvertedList.InvertedListGenerator()
-    inverted_list = invListObj.generate_inverted_list(docs_dict)
-    indexer = Indexer.Indexer()
-    indexer.generate_model(inverted_list)
-    searcher = Searcher(indexer)
-    print(searcher.search("mundo"))
+    searcher = Searcher()
+    searcher.do_search()
