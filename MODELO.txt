@@ -1,0 +1,2 @@
+O modelo de vetorial gerado neste projeto foi salvo usando uma simples serialização
+via módulo Pickle (padrão do Python) do objeto TfIdf, gerado durante a execução do módulo Indexer.
