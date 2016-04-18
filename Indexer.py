@@ -1,6 +1,8 @@
 __author__ = 'gabriel'
 import numpy as np
 from scipy.sparse import lil_matrix, csr_matrix, coo_matrix
+import ConfigReader
+import pickle
 
 def tf_idf(document_term_matrix):
         n_docs, n_terms = np.shape(document_term_matrix)
@@ -24,8 +26,19 @@ def tf_idf(document_term_matrix):
 
 class Indexer():
     def __init__(self, weight_function = tf_idf):
-        self.document_term_matrix = np.array([])
         self.weight_function = weight_function
+
+    def read_inv_list(self, inv_list_file):
+        pass
+
+    def do_index(self, cfg_file="index.cfg"):
+        cfg = ConfigReader.read_cfg(cfg_file)
+        inv_list_file = cfg['LEIA'][0]
+        model_file = cfg['ESCREVA'][0]
+        inv_list = self.read_inv_list(inv_list_file)
+
+        self.generate_model(inv_list)
+        model = pickle.dumps(inv_list, model_file)
 
     def generate_model(self, inverted_list):
         n_terms = len(inverted_list)
