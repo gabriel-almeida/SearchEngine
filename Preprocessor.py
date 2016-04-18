@@ -1,9 +1,11 @@
-__author__ = 'gabriel'
 import unicodedata
 import re
 
+__author__ = 'gabriel'
+
 acceptable = re.compile('[^A-Z ]')
 spaces = re.compile('[ ]+')
+
 
 def preprocessor_tokenizer(txt):
     txt = txt.upper()
@@ -11,6 +13,3 @@ def preprocessor_tokenizer(txt):
     txt = acceptable.sub(" ", txt)
     tokens = spaces.split(txt)
     return [t for t in  tokens if len(t) >= 2]
-
-if __name__ == "__main__":
-    print(preprocessor_tokenizer("olá, mundão! hu3     hu3"))

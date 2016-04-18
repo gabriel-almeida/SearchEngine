@@ -1,5 +1,6 @@
 __author__ = 'gabriel'
 
+
 def read_cfg(cfg_file):
     configs = dict()
     with open(cfg_file) as f:

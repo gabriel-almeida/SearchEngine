@@ -3,6 +3,8 @@ import ConfigReader
 import pickle
 import collections
 import Preprocessor
+import logging
+import time
 
 __author__ = 'gabriel'
 
@@ -19,6 +21,7 @@ class TfIdf:
         self.term_document_frequency = dict()
         self.document_max_term_frequency = dict()
 
+        begin_time = time.perf_counter()
         for term in inverted_list:
             counter = collections.Counter(inverted_list[term])
 
@@ -29,6 +32,10 @@ class TfIdf:
                 if doc_id not in self.document_max_term_frequency or \
                 self.document_max_term_frequency[doc_id] < counter[doc_id]:
                     self.document_max_term_frequency[doc_id] = counter[doc_id]
+
+        end_time = time.perf_counter()
+        elapsed_time = end_time - begin_time
+        logging.info("Model generation performance: " + str(elapsed_time/self.n_terms) + " terms per seconds")
 
     def weight(self, term, doc_id):
         if term not in self.document_frequency:
@@ -105,16 +112,28 @@ class Indexer():
         return inv_list
 
     def do_index(self, cfg_file="index.cfg"):
+        logging.info("Execution begin")
+
         cfg = ConfigReader.read_cfg(cfg_file)
+        logging.info("Configuration file read")
+
         inv_list_file = cfg['LEIA'][0]
         model_file = cfg['ESCREVA'][0]
+
         inv_list = self.read_inv_list(inv_list_file)
+        logging.info("Inverted list read: " + str(len(inv_list)) + " terms")
 
         self.weight_function.generate_model(inv_list)
+        logging.info("Model generated")
+
         with open(model_file, 'wb') as pick_file:
             pickle.dump(self.weight_function, pick_file)
+        logging.info("Model saved")
+
+        logging.info("Execution ended")
 
 
 if __name__ == "__main__":
+    logging.basicConfig(filename='log/indexer.log', level=logging.INFO, format='%(asctime)s\t%(levelname)s\t%(message)s')
     index = Indexer()
     index.do_index()
