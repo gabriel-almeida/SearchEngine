@@ -15,12 +15,12 @@ class QueryProcessor:
     def write_queries(self, query_file_name, expected_file_name):
         with open(query_file_name, 'w') as file:
             for query_id, query in self.query_dict.items():
-                file.write(query_id + ';' + query + '\n')
+                file.write(str(int(query_id)) + ';' + query + '\n')
         with open(expected_file_name, 'w') as file:
             for query_id, tuples in self.expected_docs_by_query.items():
-                file.write(query_id + ';[')
+                file.write(str(int(query_id)) + ';[')
                 for doc_id, votes in tuples:
-                    file.write("(" + doc_id + "," + str(votes) + "),")
+                    file.write("(" + str(int(doc_id)) + "," + str(votes) + "),")
                 file.write("]\n")
 
     def _process_xml_query(self, xml_node):

@@ -55,10 +55,10 @@ class Searcher:
         sorted_docs = list(similarities .keys())
         sorted_docs.sort(key=lambda doc_id: similarities[doc_id], reverse=True)
 
-        results_file.write(query_id + "; [")
+        results_file.write(str(int(query_id)) + "; [")
         i = 1
         for doc_id in sorted_docs:
-            results_file.write("(" + str(i) + ", " + str(doc_id) + ", " + str(similarities[doc_id]) + "), ")
+            results_file.write("(" + str(i) + ", " + str(int(doc_id)) + ", " + str(similarities[doc_id]) + "), ")
             i += 1
         results_file.write("]\n")
 
